@@ -9,6 +9,15 @@ EditorBuildSettings:
     path: Assets/Scenes/_Lobby.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
+    path: Assets/Scenes/Space Invaders.unity
+    guid: 30e7a07265c405046a8cd08b19985b50
+  - enabled: 1
+    path: Assets/Scenes/Turn Based Game.unity
+    guid: c43478117e2ae7643884b4d9258d12b1
+  - enabled: 1
+    path: Assets/Scenes/Pong.unity
+    guid: 4da274925bb364447bf941f160fd53ae
+  - enabled: 1
     path: Assets/Scenes/Race Scene.unity
     guid: b3860bc966d93b046aa8d0b703513b10
   - enabled: 1

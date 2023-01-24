@@ -11,13 +11,15 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     
     
     [SerializeField] UIManager uiManager;
+    [SerializeField]
+    int MaxPlayer;
     bool isFirstTime = true;
 
     void Start()
     {
         Debug.Log("SendRate" + PhotonNetwork.SendRate);
         Debug.Log("SerializationRate" + PhotonNetwork.SerializationRate);
-
+        gameObject.tag = "Enemy";
 
         //Defines how many times per second the PhotonHandler should send data, 
      //   PhotonNetwork.SendRate = 10; //  Default: 30.
@@ -29,7 +31,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         
         
         PhotonNetwork.NickName = "Player_" + Random.Range(0, 1000);
-        
         uiManager.AddTitle(PhotonNetwork.NickName + " is connecting ");
         PhotonNetwork.AutomaticallySyncScene = true;
     }
@@ -42,42 +43,20 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         roomOptions.IsVisible = true;
         roomOptions.IsOpen = true;
-        roomOptions.MaxPlayers = 15;
-
-        ExitGames.Client.Photon.Hashtable roomCustomProps = new ExitGames.Client.Photon.Hashtable();
-        roomCustomProps.Add("Color", "Blue");
-        roomCustomProps.Add("Level", "Easy");
-
-        roomOptions.CustomRoomProperties = roomCustomProps;
-
-        
-        string[] customPropertiesForLobby = { "Color", "Level" };
-
-        roomOptions.CustomRoomPropertiesForLobby = customPropertiesForLobby;
-
-
-
+        roomOptions.MaxPlayers = 2;
+        roomOptions.BroadcastPropsChangeToAll = true;
 
         string roomName = "Room_" + Random.Range(0, 1000);
 
-        PhotonNetwork.CreateRoom(null, roomOptions); // we can also put null in room name and photon will alocate a radom room
+        PhotonNetwork.CreateRoom(roomName, roomOptions); // we can also put null in room name and photon will alocate a radom room
     }
 
-
-    private void CreateCustomProperty()
+    void LoadGame()
     {
+        PhotonNetwork.LoadLevel(1);
 
-
-        ExitGames.Client.Photon.Hashtable myCustomProperties;
-
-        myCustomProperties = new ExitGames.Client.Photon.Hashtable();
-
-        myCustomProperties["Age"] = Random.Range(10, 30);
-        myCustomProperties["Score"] = 0;
-        PhotonNetwork.LocalPlayer.SetCustomProperties(myCustomProperties);
-
-        Debug.Log("my Age " + PhotonNetwork.LocalPlayer.CustomProperties["Age"].ToString());
     }
+
 
 
     #region Photon Callbacks
@@ -90,10 +69,10 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
 
-        //The first we try to do is to join a potential existing room.
+
         PhotonNetwork.JoinRandomRoom();
         uiManager.AddTitle(PhotonNetwork.NickName + " is trying to join room");
-        CreateCustomProperty();
+
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -119,24 +98,29 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
         uiManager.AddTitle(PhotonNetwork.NickName + " has joined a room" + PhotonNetwork.CurrentRoom.Name);
      
-
-
-        if (PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.CurrentRoom.PlayerCount< PhotonNetwork.CurrentRoom.MaxPlayers)
         {
-             PhotonNetwork.LoadLevel(1);
+            uiManager.AddTitle("Waiting for Player");
         }
+        else
+        {
+            LoadGame();
+        }
+        
+       
       
 
     }
-
-
-    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if (changedProps.ContainsKey("Age"))
+        uiManager.AddTitle(newPlayer.NickName + " has Enterd the room");
+        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
         {
-            // update tagetPlayer age
+            LoadGame();
         }
     }
+
+
 
 
 
